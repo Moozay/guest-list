@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Guest Invites"
+description = "Create event invitations with QR tickets and check guests in from a camera or QR image."
+version = "1.0.0"
+id = "artifacts/guest-invites"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18659
+
+[services.development]
+run = "pnpm --filter @workspace/guest-invites run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/guest-invites", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/guest-invites/out"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18659"
+BASE_PATH = "/"

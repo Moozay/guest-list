@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: invites
+    description: Guest invitation and check-in operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,123 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /invites:
+    get:
+      operationId: listInvites
+      tags: [invites]
+      summary: List invitations
+      responses:
+        "200":
+          description: Invitations ordered by creation time
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invite"
+    post:
+      operationId: createInvite
+      tags: [invites]
+      summary: Create an invitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteInput"
+      responses:
+        "201":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invite"
+        "400":
+          description: Invalid invitation details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /invites/summary:
+    get:
+      operationId: getInviteSummary
+      tags: [invites]
+      summary: Get invitation and arrival totals
+      responses:
+        "200":
+          description: Current invitation totals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InviteSummary"
+  /invites/resolve:
+    post:
+      operationId: resolveInvite
+      tags: [invites]
+      summary: Validate a scanned QR payload and retrieve its invitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteScanInput"
+      responses:
+        "200":
+          description: The scan result, including invalid codes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InviteScanResult"
+  /invites/{id}:
+    get:
+      operationId: getInvite
+      tags: [invites]
+      summary: Get one invitation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Invitation details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invite"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /invites/{id}/check-in:
+    post:
+      operationId: checkInInvite
+      tags: [invites]
+      summary: Mark an invitation as arrived
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The arrival result, including repeated check-ins
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInResult"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +152,108 @@ components:
           type: string
       required:
         - status
+    Invite:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        numberOfGuests:
+          type: integer
+          minimum: 1
+          maximum: 20
+        phoneNumber:
+          type: string
+        email:
+          type: string
+          format: email
+        inviteCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        arrivedAt:
+          type: [string, "null"]
+          format: date-time
+      required:
+        - id
+        - fullName
+        - numberOfGuests
+        - phoneNumber
+        - email
+        - inviteCode
+        - createdAt
+        - arrivedAt
+    InviteInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        numberOfGuests:
+          type: integer
+          minimum: 1
+          maximum: 20
+        phoneNumber:
+          type: string
+          minLength: 5
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required:
+        - fullName
+        - numberOfGuests
+        - phoneNumber
+        - email
+    InviteScanInput:
+      type: object
+      properties:
+        qrPayload:
+          type: string
+          minLength: 1
+          maxLength: 2048
+      required:
+        - qrPayload
+    InviteScanResult:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [valid, already_checked_in, not_valid]
+        invite:
+          anyOf:
+            - $ref: "#/components/schemas/Invite"
+            - type: "null"
+      required: [status, invite]
+    CheckInResult:
+      type: object
+      properties:
+        invite:
+          $ref: "#/components/schemas/Invite"
+        alreadyCheckedIn:
+          type: boolean
+      required: [invite, alreadyCheckedIn]
+    InviteSummary:
+      type: object
+      properties:
+        totalInvites:
+          type: integer
+        totalGuests:
+          type: integer
+        arrivedInvites:
+          type: integer
+        arrivedGuests:
+          type: integer
+      required: [totalInvites, totalGuests, arrivedInvites, arrivedGuests]
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
 
