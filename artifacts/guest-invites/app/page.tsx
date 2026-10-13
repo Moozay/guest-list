@@ -1,5 +1,1 @@
-import GuestInvitesApp from '../src/components/guest-invites-app';
-
-export default function Page() {
-  return <GuestInvitesApp />;
-}
+export { default } from '../src/app/page';
