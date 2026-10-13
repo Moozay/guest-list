@@ -3,6 +3,7 @@
   "include": [
     "next-env.d.ts",
     "app/**/*",
+    "pages/**/*",
     "src/**/*",
     ".next/types/**/*.ts"
   ],

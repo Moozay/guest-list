@@ -1,8 +1,12 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  transpilePackages: ['@workspace/api-client-react'],
+  transpilePackages: [
+    '@workspace/api-client-react',
+    '@workspace/api-server',
+    '@workspace/api-zod',
+    '@workspace/db',
+  ],
 };
 
 export default nextConfig;
