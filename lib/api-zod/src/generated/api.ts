@@ -140,6 +140,58 @@ export const GetInviteResponse = zod.object({
 
 
 /**
+ * @summary Update an invitation
+ */
+export const UpdateInviteParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateInviteBodyFullNameMin = 2;
+export const updateInviteBodyFullNameMax = 120;
+
+export const updateInviteBodyNumberOfGuestsMax = 20;
+
+export const updateInviteBodyPhoneNumberMin = 5;
+export const updateInviteBodyPhoneNumberMax = 30;
+
+export const updateInviteBodyEmailMax = 254;
+
+
+
+export const UpdateInviteBody = zod.object({
+  "fullName": zod.string().min(updateInviteBodyFullNameMin).max(updateInviteBodyFullNameMax),
+  "numberOfGuests": zod.number().int().min(1).max(updateInviteBodyNumberOfGuestsMax),
+  "phoneNumber": zod.string().min(updateInviteBodyPhoneNumberMin).max(updateInviteBodyPhoneNumberMax),
+  "email": zod.string().email().max(updateInviteBodyEmailMax)
+})
+
+export const updateInviteResponseNumberOfGuestsMax = 20;
+
+
+
+export const UpdateInviteResponse = zod.object({
+  "id": zod.string().uuid(),
+  "fullName": zod.string(),
+  "numberOfGuests": zod.number().int().min(1).max(updateInviteResponseNumberOfGuestsMax),
+  "phoneNumber": zod.string(),
+  "email": zod.string().email(),
+  "inviteCode": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "arrivedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Delete an invitation
+ */
+export const DeleteInviteParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const DeleteInviteResponse = zod.void()
+
+
+/**
  * @summary Mark an invitation as arrived
  */
 export const CheckInInviteParams = zod.object({

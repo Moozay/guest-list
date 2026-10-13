@@ -542,6 +542,169 @@ export function useGetInvite<TData = Awaited<ReturnType<typeof getInvite>>, TErr
 
 
 
+export const getUpdateInviteUrl = (id: string,) => {
+
+
+
+
+  return `/api/invites/${id}`
+}
+
+/**
+ * @summary Update an invitation
+ */
+export const updateInvite = async (id: string,
+    inviteInput: InviteInput, options?: Parameters<typeof customFetch>[1]): Promise<Invite> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Invite>(getUpdateInviteUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(inviteInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateInviteMutationKey = () => ['updateInvite'] as const;
+
+export const getUpdateInviteMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateInvite>>, TError,UpdateInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateInvite>>, TError,UpdateInviteMutationVariables, TContext> => {
+
+const mutationKey = getUpdateInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateInvite>>, UpdateInviteMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateInvite(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateInviteMutationResult = NonNullable<Awaited<ReturnType<typeof updateInvite>>>
+    export type UpdateInviteMutationBody = BodyType<InviteInput>
+    export type UpdateInviteMutationError = ErrorType<ApiError>
+    export type UpdateInviteMutationVariables = {id: string;data: BodyType<InviteInput>}
+
+    /**
+ * @summary Update an invitation
+ */
+export const useUpdateInvite = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateInvite>>, TError,UpdateInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateInvite>>,
+        TError,
+        UpdateInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateInviteMutationOptions(options));
+    }
+
+export const getDeleteInviteUrl = (id: string,) => {
+
+
+
+
+  return `/api/invites/${id}`
+}
+
+/**
+ * @summary Delete an invitation
+ */
+export const deleteInvite = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteInviteUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteInviteMutationKey = () => ['deleteInvite'] as const;
+
+export const getDeleteInviteMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteInvite>>, TError,DeleteInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteInvite>>, TError,DeleteInviteMutationVariables, TContext> => {
+
+const mutationKey = getDeleteInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteInvite>>, DeleteInviteMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteInvite(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteInviteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteInvite>>>
+
+    export type DeleteInviteMutationError = ErrorType<ApiError>
+    export type DeleteInviteMutationVariables = {id: string}
+
+    /**
+ * @summary Delete an invitation
+ */
+export const useDeleteInvite = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteInvite>>, TError,DeleteInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteInvite>>,
+        TError,
+        DeleteInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteInviteMutationOptions(options));
+    }
+
 export const getCheckInInviteUrl = (id: string,) => {
 
 

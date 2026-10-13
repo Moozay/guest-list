@@ -7,12 +7,15 @@ import {
   CheckInInviteResponse,
   CreateInviteBody,
   CreateInviteResponse,
+  DeleteInviteParams,
   GetInviteParams,
   GetInviteResponse,
   GetInviteSummaryResponse,
   ListInvitesResponse,
   ResolveInviteBody,
   ResolveInviteResponse,
+  UpdateInviteBody,
+  UpdateInviteResponse,
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -140,6 +143,79 @@ router.get("/invites/:id", async (req, res): Promise<void> => {
   }
 
   res.json(GetInviteResponse.parse(invite));
+});
+
+router.patch("/invites/:id", async (req, res): Promise<void> => {
+  const params = GetInviteParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "Invalid invite ID." });
+    return;
+  }
+
+  const parsed = UpdateInviteBody.safeParse(req.body);
+  if (!parsed.success) {
+    req.log.warn(
+      { fields: parsed.error.issues.map((issue) => issue.path.join(".")) },
+      "Invalid invite update payload",
+    );
+    res.status(400).json({ error: "Check the invite details and try again." });
+    return;
+  }
+
+  const input = {
+    ...parsed.data,
+    fullName: parsed.data.fullName.trim(),
+    phoneNumber: parsed.data.phoneNumber.trim(),
+    email: parsed.data.email.trim(),
+  };
+  const normalized = UpdateInviteBody.safeParse(input);
+  const phoneDigits = input.phoneNumber.replace(/\D/g, "").length;
+  if (
+    !normalized.success
+    || !/^[+()\d\s.-]+$/.test(input.phoneNumber)
+    || phoneDigits < 5
+  ) {
+    res.status(400).json({ error: "Check the invite details and try again." });
+    return;
+  }
+
+  const [updatedInvite] = await db
+    .update(invitesTable)
+    .set({
+      ...normalized.data,
+      fullName: input.fullName,
+      phoneNumber: input.phoneNumber,
+      email: input.email,
+    })
+    .where(eq(invitesTable.id, params.data.id))
+    .returning();
+
+  if (!updatedInvite) {
+    res.status(404).json({ error: "Invite not found." });
+    return;
+  }
+
+  res.json(UpdateInviteResponse.parse(updatedInvite));
+});
+
+router.delete("/invites/:id", async (req, res): Promise<void> => {
+  const params = DeleteInviteParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "Invalid invite ID." });
+    return;
+  }
+
+  const [deletedInvite] = await db
+    .delete(invitesTable)
+    .where(eq(invitesTable.id, params.data.id))
+    .returning({ id: invitesTable.id });
+
+  if (!deletedInvite) {
+    res.status(404).json({ error: "Invite not found." });
+    return;
+  }
+
+  res.status(204).send();
 });
 
 router.post("/invites/:id/check-in", async (req, res): Promise<void> => {
