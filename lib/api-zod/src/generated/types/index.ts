@@ -15,3 +15,5 @@ export * from './inviteScanInput';
 export * from './inviteScanResult';
 export * from './inviteScanResultStatus';
 export * from './inviteSummary';
+export * from './rsvpStatus';
+export * from './updateInviteInput';

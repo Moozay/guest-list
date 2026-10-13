@@ -27,7 +27,8 @@ import type {
   InviteInput,
   InviteScanInput,
   InviteScanResult,
-  InviteSummary
+  InviteSummary,
+  UpdateInviteInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -554,7 +555,7 @@ export const getUpdateInviteUrl = (id: string,) => {
  * @summary Update an invitation
  */
 export const updateInvite = async (id: string,
-    inviteInput: InviteInput, options?: Parameters<typeof customFetch>[1]): Promise<Invite> => {
+    updateInviteInput: UpdateInviteInput, options?: Parameters<typeof customFetch>[1]): Promise<Invite> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -575,7 +576,7 @@ return customFetch<Invite>(getUpdateInviteUrl(id),
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(inviteInput)
+    body: JSON.stringify(updateInviteInput)
   }
 );}
 
@@ -613,9 +614,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateInviteMutationResult = NonNullable<Awaited<ReturnType<typeof updateInvite>>>
-    export type UpdateInviteMutationBody = BodyType<InviteInput>
+    export type UpdateInviteMutationBody = BodyType<UpdateInviteInput>
     export type UpdateInviteMutationError = ErrorType<ApiError>
-    export type UpdateInviteMutationVariables = {id: string;data: BodyType<InviteInput>}
+    export type UpdateInviteMutationVariables = {id: string;data: BodyType<UpdateInviteInput>}
 
     /**
  * @summary Update an invitation

@@ -1,6 +1,8 @@
-import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+
+export const rsvpStatusEnum = pgEnum("rsvp_status", ["pending", "accepted", "declined"]);
 
 export const invitesTable = pgTable("invites", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -9,6 +11,7 @@ export const invitesTable = pgTable("invites", {
   phoneNumber: text("phone_number").notNull(),
   email: text("email").notNull(),
   inviteCode: text("invite_code").notNull().unique(),
+  rsvpStatus: rsvpStatusEnum("rsvp_status").notNull().default("pending"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

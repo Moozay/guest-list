@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { RsvpStatus } from './rsvpStatus';
 
 export interface Invite {
   id: string;
@@ -17,6 +18,7 @@ export interface Invite {
   phoneNumber: string;
   email: string;
   inviteCode: string;
+  rsvpStatus: RsvpStatus;
   createdAt: Date;
   /** @nullable */
   arrivedAt: Date | null;

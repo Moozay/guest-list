@@ -29,13 +29,25 @@ type InviteListProps = {
 };
 
 type FieldErrors = Partial<Record<keyof InviteInput, string>>;
+type EditInviteInput = InviteInput & Pick<Invite, 'rsvpStatus'>;
 
-const initialFormValues: InviteInput = {
+const initialFormValues: EditInviteInput = {
   fullName: '',
   numberOfGuests: 1,
   phoneNumber: '',
   email: '',
+  rsvpStatus: 'pending',
 };
+
+const rsvpStatusLabels: Record<Invite['rsvpStatus'], string> = {
+  pending: 'Pending RSVP',
+  accepted: 'Accepted',
+  declined: 'Declined',
+};
+
+function isRsvpStatus(value: string): value is Invite['rsvpStatus'] {
+  return value === 'pending' || value === 'accepted' || value === 'declined';
+}
 
 function initials(name: string) {
   return name
@@ -100,7 +112,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
   const deleteInvite = useDeleteInvite();
   const [search, setSearch] = useState('');
   const [editingInvite, setEditingInvite] = useState<Invite | null>(null);
-  const [formValues, setFormValues] = useState<InviteInput>(initialFormValues);
+  const [formValues, setFormValues] = useState<EditInviteInput>(initialFormValues);
   const [formErrors, setFormErrors] = useState<FieldErrors>({});
 
   const filteredInvites = useMemo(() => {
@@ -129,6 +141,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
       numberOfGuests: invite.numberOfGuests,
       phoneNumber: invite.phoneNumber,
       email: invite.email,
+      rsvpStatus: invite.rsvpStatus,
     });
     setFormErrors({});
   }
@@ -139,7 +152,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
     setFormErrors({});
   }
 
-  function updateForm<K extends keyof InviteInput>(key: K, value: InviteInput[K]) {
+  function updateForm<K extends keyof EditInviteInput>(key: K, value: EditInviteInput[K]) {
     setFormValues((previous) => ({ ...previous, [key]: value }));
     setFormErrors((previous) => ({ ...previous, [key]: undefined }));
   }
@@ -163,6 +176,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
           numberOfGuests: formValues.numberOfGuests,
           phoneNumber: formValues.phoneNumber.trim(),
           email: formValues.email.trim(),
+          rsvpStatus: formValues.rsvpStatus,
         },
       },
       {
@@ -274,6 +288,9 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
                 </div>
               </div>
               <div className="invite-right">
+                <span className={`rsvp-badge rsvp-${invite.rsvpStatus}`} data-testid={`status-rsvp-${invite.id}`}>
+                  {rsvpStatusLabels[invite.rsvpStatus]}
+                </span>
                 {invite.arrivedAt ? (
                   <span className="arrived-badge" data-testid={`status-arrived-${invite.id}`}>
                     <Check size={11} /> Arrived
@@ -390,6 +407,23 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
                 aria-invalid={Boolean(formErrors.email)}
               />
               {formErrors.email && <span className="field-error">{formErrors.email}</span>}
+            </div>
+
+            <div className="field">
+              <label htmlFor="edit-guest-rsvp">RSVP status</label>
+              <select
+                id="edit-guest-rsvp"
+                value={formValues.rsvpStatus}
+                onChange={(event) => {
+                  if (isRsvpStatus(event.target.value)) {
+                    updateForm('rsvpStatus', event.target.value);
+                  }
+                }}
+              >
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="declined">Declined</option>
+              </select>
             </div>
           </div>
 

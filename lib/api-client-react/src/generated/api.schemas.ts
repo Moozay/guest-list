@@ -9,6 +9,15 @@ export interface HealthStatus {
   status: string;
 }
 
+export type RsvpStatus = typeof RsvpStatus[keyof typeof RsvpStatus];
+
+
+export const RsvpStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  declined: 'declined',
+} as const;
+
 export interface Invite {
   id: string;
   fullName: string;
@@ -20,6 +29,7 @@ export interface Invite {
   phoneNumber: string;
   email: string;
   inviteCode: string;
+  rsvpStatus: RsvpStatus;
   createdAt: string;
   /** @nullable */
   arrivedAt: string | null;
@@ -43,6 +53,27 @@ export interface InviteInput {
   phoneNumber: string;
   /** @maxLength 254 */
   email: string;
+}
+
+export interface UpdateInviteInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  fullName: string;
+  /**
+     * @minimum 1
+     * @maximum 20
+     */
+  numberOfGuests: number;
+  /**
+     * @minLength 5
+     * @maxLength 30
+     */
+  phoneNumber: string;
+  /** @maxLength 254 */
+  email: string;
+  rsvpStatus: RsvpStatus;
 }
 
 export interface InviteScanInput {

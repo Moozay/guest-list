@@ -134,7 +134,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/InviteInput"
+              $ref: "#/components/schemas/UpdateInviteInput"
       responses:
         "200":
           description: Invitation updated
@@ -227,6 +227,8 @@ components:
           format: email
         inviteCode:
           type: string
+        rsvpStatus:
+          $ref: "#/components/schemas/RsvpStatus"
         createdAt:
           type: string
           format: date-time
@@ -240,8 +242,12 @@ components:
         - phoneNumber
         - email
         - inviteCode
+        - rsvpStatus
         - createdAt
         - arrivedAt
+    RsvpStatus:
+      type: string
+      enum: [pending, accepted, declined]
     InviteInput:
       type: object
       properties:
@@ -266,6 +272,33 @@ components:
         - numberOfGuests
         - phoneNumber
         - email
+    UpdateInviteInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        numberOfGuests:
+          type: integer
+          minimum: 1
+          maximum: 20
+        phoneNumber:
+          type: string
+          minLength: 5
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        rsvpStatus:
+          $ref: "#/components/schemas/RsvpStatus"
+      required:
+        - fullName
+        - numberOfGuests
+        - phoneNumber
+        - email
+        - rsvpStatus
     InviteScanInput:
       type: object
       properties:
@@ -312,4 +345,3 @@ components:
         error:
           type: string
       required: [error]
-

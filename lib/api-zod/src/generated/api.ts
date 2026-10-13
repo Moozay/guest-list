@@ -31,6 +31,7 @@ export const ListInvitesResponseItem = zod.object({
   "phoneNumber": zod.string(),
   "email": zod.string().email(),
   "inviteCode": zod.string(),
+  "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
   "arrivedAt": zod.coerce.date().nullable()
 })
@@ -70,6 +71,7 @@ export const CreateInviteResponse = zod.object({
   "phoneNumber": zod.string(),
   "email": zod.string().email(),
   "inviteCode": zod.string(),
+  "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
   "arrivedAt": zod.coerce.date().nullable()
 })
@@ -110,6 +112,7 @@ export const ResolveInviteResponse = zod.object({
   "phoneNumber": zod.string(),
   "email": zod.string().email(),
   "inviteCode": zod.string(),
+  "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
   "arrivedAt": zod.coerce.date().nullable()
 }),zod.null()])
@@ -134,6 +137,7 @@ export const GetInviteResponse = zod.object({
   "phoneNumber": zod.string(),
   "email": zod.string().email(),
   "inviteCode": zod.string(),
+  "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
   "arrivedAt": zod.coerce.date().nullable()
 })
@@ -162,7 +166,8 @@ export const UpdateInviteBody = zod.object({
   "fullName": zod.string().min(updateInviteBodyFullNameMin).max(updateInviteBodyFullNameMax),
   "numberOfGuests": zod.number().int().min(1).max(updateInviteBodyNumberOfGuestsMax),
   "phoneNumber": zod.string().min(updateInviteBodyPhoneNumberMin).max(updateInviteBodyPhoneNumberMax),
-  "email": zod.string().email().max(updateInviteBodyEmailMax)
+  "email": zod.string().email().max(updateInviteBodyEmailMax),
+  "rsvpStatus": zod.enum(['pending', 'accepted', 'declined'])
 })
 
 export const updateInviteResponseNumberOfGuestsMax = 20;
@@ -176,6 +181,7 @@ export const UpdateInviteResponse = zod.object({
   "phoneNumber": zod.string(),
   "email": zod.string().email(),
   "inviteCode": zod.string(),
+  "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
   "arrivedAt": zod.coerce.date().nullable()
 })
@@ -210,6 +216,7 @@ export const CheckInInviteResponse = zod.object({
   "phoneNumber": zod.string(),
   "email": zod.string().email(),
   "inviteCode": zod.string(),
+  "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
   "arrivedAt": zod.coerce.date().nullable()
 }),

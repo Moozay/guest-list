@@ -87,7 +87,7 @@ export function TicketQrDialog({ invite, onClose }: TicketQrDialogProps) {
       const qrImage = await pdf.embedPng(qrBytes);
       const page = pages[1];
       const { width, height } = page.getSize();
-      const qrSize = Math.min(width, height) * 0.3;
+      const qrSize = Math.min(width, height) * 0.33;
 
       page.drawImage(qrImage, {
         x: (width - qrSize) / 2,
@@ -100,7 +100,13 @@ export function TicketQrDialog({ invite, onClose }: TicketQrDialogProps) {
       const pdfBlob = new Blob([new Uint8Array(pdfBytes).buffer], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
       const downloadLink = document.createElement('a');
-      downloadLink.download = `guest-invite-${invite.inviteCode}.pdf`;
+      const guestName = invite.fullName
+        .normalize('NFKC')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\p{L}\p{N}_.-]/gu, '')
+        .replace(/^[.-]+|[.-]+$/g, '') || 'guest';
+      downloadLink.download = `guest-invite-${guestName}.pdf`;
       downloadLink.href = pdfUrl;
       downloadLink.click();
       window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
