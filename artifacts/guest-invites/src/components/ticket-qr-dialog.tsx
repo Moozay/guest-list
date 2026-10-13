@@ -54,11 +54,25 @@ export function TicketQrDialog({ invite, onClose }: TicketQrDialogProps) {
     };
   }, [invite.id]);
 
-  async function downloadQrCode() {
+  async function downloadInvitePdf() {
     setDownloadPending(true);
     setQrError('');
 
     try {
+      const [{ PDFDocument }, templateResponse] = await Promise.all([
+        import('pdf-lib'),
+        fetch('/invite.pdf'),
+      ]);
+      if (!templateResponse.ok) {
+        throw new Error(`Invite PDF template request failed: ${templateResponse.status}`);
+      }
+
+      const pdf = await PDFDocument.load(await templateResponse.arrayBuffer());
+      const pages = pdf.getPages();
+      if (pages.length < 2) {
+        throw new Error('Invite PDF template must contain at least two pages.');
+      }
+
       const qrDataUrl = await QRCode.toDataURL(invitePayload(invite.id), {
         width: 400,
         margin: 1,
@@ -68,13 +82,30 @@ export function TicketQrDialog({ invite, onClose }: TicketQrDialogProps) {
           light: '#ffffff',
         },
       });
+      const qrBase64 = qrDataUrl.slice(qrDataUrl.indexOf(',') + 1);
+      const qrBytes = Uint8Array.from(atob(qrBase64), (character) => character.charCodeAt(0));
+      const qrImage = await pdf.embedPng(qrBytes);
+      const page = pages[1];
+      const { width, height } = page.getSize();
+      const qrSize = Math.min(width, height) * 0.3;
 
+      page.drawImage(qrImage, {
+        x: (width - qrSize) / 2,
+        y: (height - qrSize) / 2,
+        width: qrSize,
+        height: qrSize,
+      });
+
+      const pdfBytes = await pdf.save();
+      const pdfBlob = new Blob([new Uint8Array(pdfBytes).buffer], { type: 'application/pdf' });
+      const pdfUrl = URL.createObjectURL(pdfBlob);
       const downloadLink = document.createElement('a');
-      downloadLink.download = `guest-qr-${invite.inviteCode}.png`;
-      downloadLink.href = qrDataUrl;
+      downloadLink.download = `guest-invite-${invite.inviteCode}.pdf`;
+      downloadLink.href = pdfUrl;
       downloadLink.click();
+      window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
     } catch {
-      setQrError('The QR code could not be downloaded. Please try again.');
+      setQrError('The invite PDF could not be created. Please try again.');
     } finally {
       setDownloadPending(false);
     }
@@ -96,7 +127,7 @@ export function TicketQrDialog({ invite, onClose }: TicketQrDialogProps) {
             GUEST INVITES
           </div>
           <h2 id="ticket-title">Your guest ticket</h2>
-          <p>Show this code at the door for a quick check-in.</p>
+          <p>Your invite PDF includes this QR code on page two.</p>
         </div>
         <div className="ticket-content">
           <div className="qr-shell" aria-label={`QR ticket for ${invite.fullName}`}>
@@ -113,11 +144,11 @@ export function TicketQrDialog({ invite, onClose }: TicketQrDialogProps) {
               className="button button-primary"
               data-testid="button-download-ticket"
               type="button"
-              onClick={downloadQrCode}
+              onClick={downloadInvitePdf}
               disabled={!qrReady || downloadPending}
             >
               {downloadPending ? <LoaderCircle size={15} className="spin" /> : <Download size={15} />}
-              {downloadPending ? 'Preparing…' : 'Download QR code'}
+              {downloadPending ? 'Preparing…' : 'Download invite PDF'}
             </button>
             <button className="button button-outline" type="button" onClick={onClose}>Done</button>
           </div>
