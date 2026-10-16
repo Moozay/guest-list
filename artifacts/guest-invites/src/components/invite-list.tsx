@@ -288,36 +288,40 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
                 </div>
               </div>
               <div className="invite-right">
-                <span className={`rsvp-badge rsvp-${invite.rsvpStatus}`} data-testid={`status-rsvp-${invite.id}`}>
-                  {rsvpStatusLabels[invite.rsvpStatus]}
-                </span>
-                {invite.arrivedAt ? (
-                  <span className="arrived-badge" data-testid={`status-arrived-${invite.id}`}>
-                    <Check size={11} /> Arrived
+                <div className="invite-statuses">
+                  <span className={`rsvp-badge rsvp-${invite.rsvpStatus}`} data-testid={`status-rsvp-${invite.id}`}>
+                    {rsvpStatusLabels[invite.rsvpStatus]}
                   </span>
-                ) : (
-                  <span className="pending-badge" data-testid={`status-pending-${invite.id}`}>
-                    <Clock3 size={10} /> Expected
-                  </span>
-                )}
-                <button
-                  className="row-qr"
-                  data-testid={`button-show-qr-${invite.id}`}
-                  type="button"
-                  onClick={() => onShowQr(invite)}
-                >
-                  <QrCode size={10} style={{ verticalAlign: '-2px', marginRight: 3 }} />
-                  Show QR
-                </button>
-                <button
-                  className="button button-outline button-small"
-                  data-testid={`button-edit-invite-${invite.id}`}
-                  type="button"
-                  onClick={() => openEditor(invite)}
-                >
-                  <PencilLine size={11} />
-                  Edit
-                </button>
+                  {invite.arrivedAt ? (
+                    <span className="arrived-badge" data-testid={`status-arrived-${invite.id}`}>
+                      <Check size={11} /> Arrived
+                    </span>
+                  ) : (
+                    <span className="pending-badge" data-testid={`status-pending-${invite.id}`}>
+                      <Clock3 size={10} /> Expected
+                    </span>
+                  )}
+                </div>
+                <div className="invite-actions">
+                  <button
+                    className="button button-quiet button-small row-qr"
+                    data-testid={`button-show-qr-${invite.id}`}
+                    type="button"
+                    onClick={() => onShowQr(invite)}
+                  >
+                    <QrCode size={12} />
+                    Show QR
+                  </button>
+                  <button
+                    className="button button-outline button-small"
+                    data-testid={`button-edit-invite-${invite.id}`}
+                    type="button"
+                    onClick={() => openEditor(invite)}
+                  >
+                    <PencilLine size={12} />
+                    Edit
+                  </button>
+                </div>
               </div>
             </article>
           ))}

@@ -686,6 +686,17 @@ button:disabled {
   gap: 7px;
 }
 
+.invite-statuses,
+.invite-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.invite-actions {
+  gap: 5px;
+}
+
 .arrived-badge,
 .pending-badge {
   display: inline-flex;
@@ -734,14 +745,7 @@ button:disabled {
 }
 
 .row-qr {
-  padding: 0;
-  border: 0;
   color: #68767b;
-  background: transparent;
-  font-size: 10px;
-  text-decoration: underline;
-  text-decoration-color: #ccd0c8;
-  text-underline-offset: 3px;
 }
 
 .row-qr:hover {
@@ -1395,7 +1399,9 @@ button:disabled {
   }
 
   .invite-row {
+    flex-wrap: wrap;
     gap: 9px;
+    padding: 12px 0;
   }
 
   .invite-monogram {
@@ -1404,7 +1410,16 @@ button:disabled {
   }
 
   .invite-right {
-    gap: 5px;
+    flex: 1 1 calc(100% - 43px);
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    margin-left: 43px;
+  }
+
+  .invite-statuses,
+  .invite-actions {
+    flex-wrap: wrap;
   }
 
   .scanner-wrap {
