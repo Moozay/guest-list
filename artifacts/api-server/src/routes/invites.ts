@@ -70,14 +70,16 @@ router.post("/invites", async (req, res): Promise<void> => {
     ...parsed.data,
     fullName: parsed.data.fullName.trim(),
     phoneNumber: parsed.data.phoneNumber.trim(),
-    email: parsed.data.email.trim(),
+    email: parsed.data.email?.trim() ?? "",
   };
   const normalized = CreateInviteBody.safeParse(input);
   const phoneDigits = input.phoneNumber.replace(/\D/g, "").length;
+  const emailIsInvalid = input.email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email);
   if (
     !normalized.success
     || !/^[+()\d\s.-]+$/.test(input.phoneNumber)
     || phoneDigits < 5
+    || emailIsInvalid
   ) {
     res.status(400).json({ error: "Check the invite details and try again." });
     return;
@@ -87,6 +89,7 @@ router.post("/invites", async (req, res): Promise<void> => {
     .insert(invitesTable)
     .values({
       ...normalized.data,
+      email: input.email || null,
       inviteCode: createInviteCode(),
     })
     .returning();
@@ -166,14 +169,18 @@ router.patch("/invites/:id", async (req, res): Promise<void> => {
     ...parsed.data,
     fullName: parsed.data.fullName.trim(),
     phoneNumber: parsed.data.phoneNumber.trim(),
-    email: parsed.data.email.trim(),
+    email: parsed.data.email?.trim(),
   };
   const normalized = UpdateInviteBody.safeParse(input);
   const phoneDigits = input.phoneNumber.replace(/\D/g, "").length;
+  const emailIsInvalid = Boolean(
+    input.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email),
+  );
   if (
     !normalized.success
     || !/^[+()\d\s.-]+$/.test(input.phoneNumber)
     || phoneDigits < 5
+    || emailIsInvalid
   ) {
     res.status(400).json({ error: "Check the invite details and try again." });
     return;
@@ -185,7 +192,7 @@ router.patch("/invites/:id", async (req, res): Promise<void> => {
       ...normalized.data,
       fullName: input.fullName,
       phoneNumber: input.phoneNumber,
-      email: input.email,
+      email: input.email === undefined ? undefined : input.email || null,
     })
     .where(eq(invitesTable.id, params.data.id))
     .returning();

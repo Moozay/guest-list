@@ -73,7 +73,7 @@ function validateInviteForm(values: InviteInput): FieldErrors {
   const nextErrors: FieldErrors = {};
   const trimmedName = values.fullName.trim();
   const trimmedPhone = values.phoneNumber.trim();
-  const trimmedEmail = values.email.trim();
+  const trimmedEmail = values.email?.trim() ?? '';
 
   if (trimmedName.length < 2) {
     nextErrors.fullName = 'Enter at least 2 characters.';
@@ -95,11 +95,9 @@ function validateInviteForm(values: InviteInput): FieldErrors {
     nextErrors.phoneNumber = 'Enter a phone number between 5 and 30 characters.';
   }
 
-  if (!trimmedEmail) {
-    nextErrors.email = 'Enter an email address.';
-  } else if (trimmedEmail.length > 254) {
+  if (trimmedEmail.length > 254) {
     nextErrors.email = 'Email must be 254 characters or fewer.';
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+  } else if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
     nextErrors.email = 'Enter a valid email address.';
   }
 
@@ -130,7 +128,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
     return sortedInvites.filter((invite) => (
       invite.fullName.toLowerCase().includes(normalizedSearch)
       || invite.inviteCode.toLowerCase().includes(normalizedSearch)
-      || invite.email.toLowerCase().includes(normalizedSearch)
+      || (invite.email ?? '').toLowerCase().includes(normalizedSearch)
     ));
   }, [invites, search]);
 
@@ -140,7 +138,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
       fullName: invite.fullName,
       numberOfGuests: invite.numberOfGuests,
       phoneNumber: invite.phoneNumber,
-      email: invite.email,
+      email: invite.email ?? '',
       rsvpStatus: invite.rsvpStatus,
     });
     setFormErrors({});
@@ -175,7 +173,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
           fullName: formValues.fullName.trim(),
           numberOfGuests: formValues.numberOfGuests,
           phoneNumber: formValues.phoneNumber.trim(),
-          email: formValues.email.trim(),
+          email: formValues.email?.trim() ?? '',
           rsvpStatus: formValues.rsvpStatus,
         },
       },
@@ -399,7 +397,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
             </div>
 
             <div className="field">
-              <label htmlFor="edit-guest-email">Email address</label>
+              <label htmlFor="edit-guest-email">Email address (optional)</label>
               <input
                 id="edit-guest-email"
                 autoComplete="email"

@@ -24,6 +24,6 @@ export interface UpdateInviteInput {
      */
   phoneNumber: string;
   /** @maxLength 254 */
-  email: string;
+  email?: string;
   rsvpStatus: RsvpStatus;
 }

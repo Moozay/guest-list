@@ -9,7 +9,7 @@ export const invitesTable = pgTable("invites", {
   fullName: text("full_name").notNull(),
   numberOfGuests: integer("number_of_guests").notNull(),
   phoneNumber: text("phone_number").notNull(),
-  email: text("email").notNull(),
+  email: text("email"),
   inviteCode: text("invite_code").notNull().unique(),
   rsvpStatus: rsvpStatusEnum("rsvp_status").notNull().default("pending"),
   createdAt: timestamp("created_at", { withTimezone: true })

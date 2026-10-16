@@ -16,7 +16,7 @@ export interface Invite {
      */
   numberOfGuests: number;
   phoneNumber: string;
-  email: string;
+  email: string | null;
   inviteCode: string;
   rsvpStatus: RsvpStatus;
   createdAt: Date;

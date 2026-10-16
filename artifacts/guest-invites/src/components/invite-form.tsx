@@ -29,7 +29,7 @@ export function InviteForm({ onCreated }: InviteFormProps) {
     const nextErrors: FieldErrors = {};
     const trimmedName = values.fullName.trim();
     const trimmedPhone = values.phoneNumber.trim();
-    const trimmedEmail = values.email.trim();
+    const trimmedEmail = values.email?.trim() ?? '';
 
     if (trimmedName.length < 2) {
       nextErrors.fullName = 'Enter at least 2 characters.';
@@ -51,11 +51,9 @@ export function InviteForm({ onCreated }: InviteFormProps) {
       nextErrors.phoneNumber = 'Enter a phone number between 5 and 30 characters.';
     }
 
-    if (!trimmedEmail) {
-      nextErrors.email = 'Enter an email address.';
-    } else if (trimmedEmail.length > 254) {
+    if (trimmedEmail.length > 254) {
       nextErrors.email = 'Email must be 254 characters or fewer.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+    } else if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       nextErrors.email = 'Enter a valid email address.';
     }
 
@@ -80,7 +78,7 @@ export function InviteForm({ onCreated }: InviteFormProps) {
           fullName: values.fullName.trim(),
           numberOfGuests: values.numberOfGuests,
           phoneNumber: values.phoneNumber.trim(),
-          email: values.email.trim(),
+          email: values.email?.trim() ?? '',
         },
       },
       {
@@ -177,11 +175,10 @@ export function InviteForm({ onCreated }: InviteFormProps) {
         </div>
 
         <div className="field">
-          <label htmlFor="guest-email">Email address</label>
+          <label htmlFor="guest-email">Email address (optional)</label>
           <input
             id="guest-email"
             autoComplete="email"
-            required
             className={errors.email ? 'invalid' : ''}
             data-testid="input-guest-email"
             maxLength={254}

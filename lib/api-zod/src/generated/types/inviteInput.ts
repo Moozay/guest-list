@@ -23,5 +23,5 @@ export interface InviteInput {
      */
   phoneNumber: string;
   /** @maxLength 254 */
-  email: string;
+  email?: string;
 }

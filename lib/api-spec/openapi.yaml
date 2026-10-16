@@ -224,7 +224,7 @@ components:
           type: string
         email:
           type: string
-          format: email
+          nullable: true
         inviteCode:
           type: string
         rsvpStatus:
@@ -265,13 +265,11 @@ components:
           maxLength: 30
         email:
           type: string
-          format: email
           maxLength: 254
       required:
         - fullName
         - numberOfGuests
         - phoneNumber
-        - email
     UpdateInviteInput:
       type: object
       properties:
@@ -289,7 +287,6 @@ components:
           maxLength: 30
         email:
           type: string
-          format: email
           maxLength: 254
         rsvpStatus:
           $ref: "#/components/schemas/RsvpStatus"
@@ -297,7 +294,6 @@ components:
         - fullName
         - numberOfGuests
         - phoneNumber
-        - email
         - rsvpStatus
     InviteScanInput:
       type: object
