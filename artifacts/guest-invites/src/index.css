@@ -406,6 +406,13 @@ button:disabled {
   font-size: 11px;
 }
 
+.invite-list-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
 .form-body {
   display: grid;
   gap: 14px;
@@ -1384,6 +1391,10 @@ button:disabled {
 
   .panel-header {
     padding: 16px;
+  }
+
+  .invite-list-header-actions {
+    gap: 6px;
   }
 
   .form-body {

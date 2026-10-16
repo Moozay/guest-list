@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import type { Invite } from '@workspace/api-client-react';
 import { Download, LoaderCircle, TicketCheck, X } from 'lucide-react';
+import { createInvitePdf, invitePdfFilename } from '@/lib/invite-pdf';
 
 type TicketQrDialogProps = {
   invite: Invite;
@@ -59,54 +60,16 @@ export function TicketQrDialog({ invite, onClose }: TicketQrDialogProps) {
     setQrError('');
 
     try {
-      const [{ PDFDocument }, templateResponse] = await Promise.all([
-        import('pdf-lib'),
-        fetch('/invite.pdf'),
-      ]);
+      const templateResponse = await fetch('/invite.pdf');
       if (!templateResponse.ok) {
         throw new Error(`Invite PDF template request failed: ${templateResponse.status}`);
       }
 
-      const pdf = await PDFDocument.load(await templateResponse.arrayBuffer());
-      const pages = pdf.getPages();
-      if (pages.length < 2) {
-        throw new Error('Invite PDF template must contain at least two pages.');
-      }
-
-      const qrDataUrl = await QRCode.toDataURL(invitePayload(invite.id), {
-        width: 400,
-        margin: 1,
-        errorCorrectionLevel: 'H',
-        color: {
-          dark: '#202c38',
-          light: '#ffffff',
-        },
-      });
-      const qrBase64 = qrDataUrl.slice(qrDataUrl.indexOf(',') + 1);
-      const qrBytes = Uint8Array.from(atob(qrBase64), (character) => character.charCodeAt(0));
-      const qrImage = await pdf.embedPng(qrBytes);
-      const page = pages[1];
-      const { width, height } = page.getSize();
-      const qrSize = Math.min(width, height) * 0.33;
-
-      page.drawImage(qrImage, {
-        x: (width - qrSize) / 2,
-        y: (height - qrSize) / 2,
-        width: qrSize,
-        height: qrSize,
-      });
-
-      const pdfBytes = await pdf.save();
+      const pdfBytes = await createInvitePdf(invite, await templateResponse.arrayBuffer());
       const pdfBlob = new Blob([new Uint8Array(pdfBytes).buffer], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
       const downloadLink = document.createElement('a');
-      const guestName = invite.fullName
-        .normalize('NFKC')
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/[^\p{L}\p{N}_.-]/gu, '')
-        .replace(/^[.-]+|[.-]+$/g, '') || 'guest';
-      downloadLink.download = `guest-invite-${guestName}.pdf`;
+      downloadLink.download = invitePdfFilename(invite.fullName);
       downloadLink.href = pdfUrl;
       downloadLink.click();
       window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);

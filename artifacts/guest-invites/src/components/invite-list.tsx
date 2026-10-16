@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { zipSync } from 'fflate';
 import {
   getGetInviteSummaryQueryKey,
   getListInvitesQueryKey,
@@ -10,7 +11,7 @@ import {
   type Invite,
   type InviteInput,
 } from '@workspace/api-client-react';
-import { Check, Clock3, Minus, PencilLine, Plus, QrCode, Search, Trash2, UsersRound } from 'lucide-react';
+import { Check, Clock3, Download, LoaderCircle, Minus, PencilLine, Plus, QrCode, Search, Trash2, UsersRound } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { createInvitePdf, invitePdfFilename } from '@/lib/invite-pdf';
 
 type InviteListProps = {
   invites: Invite[] | undefined;
@@ -112,6 +114,9 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
   const [editingInvite, setEditingInvite] = useState<Invite | null>(null);
   const [formValues, setFormValues] = useState<EditInviteInput>(initialFormValues);
   const [formErrors, setFormErrors] = useState<FieldErrors>({});
+  const [downloadPending, setDownloadPending] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadError, setDownloadError] = useState('');
 
   const filteredInvites = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -204,6 +209,56 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
     );
   }
 
+  async function downloadAllInvites() {
+    if (!invites?.length || downloadPending) {
+      return;
+    }
+
+    setDownloadPending(true);
+    setDownloadProgress(0);
+    setDownloadError('');
+    try {
+      const templateResponse = await fetch('/invite.pdf');
+      if (!templateResponse.ok) {
+        throw new Error(`Invite PDF template request failed: ${templateResponse.status}`);
+      }
+      const templateBytes = await templateResponse.arrayBuffer();
+      const files: Record<string, Uint8Array> = {};
+      const usedFilenames = new Set<string>();
+
+      for (const invite of invites) {
+        const baseFilename = invitePdfFilename(invite.fullName);
+        const extensionIndex = baseFilename.lastIndexOf('.pdf');
+        const filenameBase = baseFilename.slice(0, extensionIndex);
+        let filename = baseFilename;
+        let suffix = 2;
+        while (usedFilenames.has(filename.toLowerCase())) {
+          filename = `${filenameBase}-${suffix}.pdf`;
+          suffix += 1;
+        }
+        usedFilenames.add(filename.toLowerCase());
+        files[filename] = await createInvitePdf(invite, templateBytes);
+        setDownloadProgress(Object.keys(files).length);
+      }
+
+      const zipBytes = zipSync(files, { level: 0 });
+      const blobBytes = new ArrayBuffer(zipBytes.byteLength);
+      new Uint8Array(blobBytes).set(zipBytes);
+      const zipBlob = new Blob([blobBytes], { type: 'application/zip' });
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.download = 'guest-invites.zip';
+      downloadLink.href = zipUrl;
+      downloadLink.click();
+      window.setTimeout(() => URL.revokeObjectURL(zipUrl), 1000);
+    } catch (error) {
+      console.error('Could not prepare the invite ZIP archive.', error);
+      setDownloadError('The invite ZIP could not be created. Please try again.');
+    } finally {
+      setDownloadPending(false);
+    }
+  }
+
   return (
     <>
       <section className="panel list-panel" aria-labelledby="invite-list-heading">
@@ -212,9 +267,23 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
             <h2 id="invite-list-heading">Guest list</h2>
             <p>Every ticket, all in one place.</p>
           </div>
-          <span className="count-chip" data-testid="text-invite-count">
-            {invites?.length ?? '—'} INVITES
-          </span>
+          <div className="invite-list-header-actions">
+            <span className="count-chip" data-testid="text-invite-count">
+              {invites?.length ?? '—'} INVITES
+            </span>
+            <button
+              className="button button-outline button-small"
+              data-testid="button-download-all-invites"
+              type="button"
+              onClick={() => void downloadAllInvites()}
+              disabled={isLoading || isError || !invites?.length || downloadPending}
+            >
+              {downloadPending
+                ? <LoaderCircle className="spin" size={13} />
+                : <Download size={13} />}
+              {downloadPending ? `Preparing ${downloadProgress}/${invites?.length ?? 0}…` : 'Download all'}
+            </button>
+          </div>
         </div>
 
         <div className="list-tools">
@@ -234,6 +303,7 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
         </div>
 
         <div className="invite-list">
+          {downloadError && <div className="scan-error" role="alert">{downloadError}</div>}
           {isLoading && (
             <div aria-label="Loading invites" data-testid="loading-invites">
               {Array.from({ length: 4 }, (_, index) => (
