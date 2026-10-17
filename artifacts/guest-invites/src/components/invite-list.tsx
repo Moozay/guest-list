@@ -354,6 +354,9 @@ export function InviteList({ invites, isLoading, isError, onRetry, onShowQr }: I
                   <span aria-hidden="true">·</span>
                   <span>{shortDate(invite.createdAt)}</span>
                 </div>
+                <div className="invite-creator">
+                  Created by {invite.createdByName ?? 'Creator not recorded'}
+                </div>
               </div>
               <div className="invite-right">
                 <div className="invite-statuses">

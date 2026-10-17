@@ -18,6 +18,129 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Log in an approved staff user
+ */
+export const loginBodyUsernameMin = 3;
+export const loginBodyUsernameMax = 64;
+
+export const loginBodyPasswordMax = 128;
+
+
+
+export const LoginBody = zod.object({
+  "username": zod.string().min(loginBodyUsernameMin).max(loginBodyUsernameMax),
+  "password": zod.string().min(1).max(loginBodyPasswordMax)
+})
+
+export const LoginResponse = zod.object({
+  "user": zod.object({
+  "id": zod.string().uuid(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['event_planner', 'guest_list_checker']),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Get the current authenticated user
+ */
+export const GetCurrentUserResponse = zod.object({
+  "user": zod.object({
+  "id": zod.string().uuid(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['event_planner', 'guest_list_checker']),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary End the current session
+ */
+export const LogoutResponse = zod.void()
+
+
+/**
+ * @summary List staff accounts
+ */
+export const ListUsersResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['event_planner', 'guest_list_checker']),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const ListUsersResponse = zod.array(ListUsersResponseItem)
+
+
+/**
+ * @summary Create an approved staff account
+ */
+export const createUserBodyUsernameMin = 3;
+export const createUserBodyUsernameMax = 64;
+
+
+export const createUserBodyUsernameRegExp = new RegExp('^[A-Za-z0-9._-]+$');
+export const createUserBodyDisplayNameMin = 2;
+export const createUserBodyDisplayNameMax = 120;
+
+export const createUserBodyPasswordMin = 12;
+export const createUserBodyPasswordMax = 128;
+
+
+
+export const CreateUserBody = zod.object({
+  "username": zod.string().min(createUserBodyUsernameMin).max(createUserBodyUsernameMax).regex(createUserBodyUsernameRegExp),
+  "displayName": zod.string().min(createUserBodyDisplayNameMin).max(createUserBodyDisplayNameMax),
+  "password": zod.string().min(createUserBodyPasswordMin).max(createUserBodyPasswordMax),
+  "role": zod.enum(['event_planner', 'guest_list_checker'])
+})
+
+export const CreateUserResponse = zod.object({
+  "id": zod.string().uuid(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['event_planner', 'guest_list_checker']),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a staff account
+ */
+export const UpdateUserParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateUserBodyPasswordMin = 12;
+export const updateUserBodyPasswordMax = 128;
+
+
+
+export const UpdateUserBody = zod.object({
+  "role": zod.enum(['event_planner', 'guest_list_checker']).optional(),
+  "isActive": zod.boolean().optional(),
+  "password": zod.string().min(updateUserBodyPasswordMin).max(updateUserBodyPasswordMax).optional()
+})
+
+export const UpdateUserResponse = zod.object({
+  "id": zod.string().uuid(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['event_planner', 'guest_list_checker']),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
  * @summary List invitations
  */
 export const listInvitesResponseNumberOfGuestsMax = 20;
@@ -30,6 +153,7 @@ export const ListInvitesResponseItem = zod.object({
   "numberOfGuests": zod.number().int().min(1).max(listInvitesResponseNumberOfGuestsMax),
   "phoneNumber": zod.string(),
   "email": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
   "inviteCode": zod.string(),
   "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
@@ -70,6 +194,7 @@ export const CreateInviteResponse = zod.object({
   "numberOfGuests": zod.number().int().min(1).max(createInviteResponseNumberOfGuestsMax),
   "phoneNumber": zod.string(),
   "email": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
   "inviteCode": zod.string(),
   "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
@@ -111,6 +236,7 @@ export const ResolveInviteResponse = zod.object({
   "numberOfGuests": zod.number().int().min(1).max(resolveInviteResponseInviteOneNumberOfGuestsMax),
   "phoneNumber": zod.string(),
   "email": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
   "inviteCode": zod.string(),
   "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
@@ -136,6 +262,7 @@ export const GetInviteResponse = zod.object({
   "numberOfGuests": zod.number().int().min(1).max(getInviteResponseNumberOfGuestsMax),
   "phoneNumber": zod.string(),
   "email": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
   "inviteCode": zod.string(),
   "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
@@ -180,6 +307,7 @@ export const UpdateInviteResponse = zod.object({
   "numberOfGuests": zod.number().int().min(1).max(updateInviteResponseNumberOfGuestsMax),
   "phoneNumber": zod.string(),
   "email": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
   "inviteCode": zod.string(),
   "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),
@@ -215,6 +343,7 @@ export const CheckInInviteResponse = zod.object({
   "numberOfGuests": zod.number().int().min(1).max(checkInInviteResponseInviteNumberOfGuestsMax),
   "phoneNumber": zod.string(),
   "email": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
   "inviteCode": zod.string(),
   "rsvpStatus": zod.enum(['pending', 'accepted', 'declined']),
   "createdAt": zod.coerce.date(),

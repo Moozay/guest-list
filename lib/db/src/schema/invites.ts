@@ -1,6 +1,7 @@
 import { integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { usersTable } from "./users";
 
 export const rsvpStatusEnum = pgEnum("rsvp_status", ["pending", "accepted", "declined"]);
 
@@ -12,6 +13,7 @@ export const invitesTable = pgTable("invites", {
   email: text("email"),
   inviteCode: text("invite_code").notNull().unique(),
   rsvpStatus: rsvpStatusEnum("rsvp_status").notNull().default("pending"),
+  createdByUserId: uuid("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

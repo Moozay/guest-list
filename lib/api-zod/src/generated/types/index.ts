@@ -7,7 +7,9 @@
  */
 
 export * from './apiError';
+export * from './authSession';
 export * from './checkInResult';
+export * from './createUserInput';
 export * from './healthStatus';
 export * from './invite';
 export * from './inviteInput';
@@ -15,5 +17,9 @@ export * from './inviteScanInput';
 export * from './inviteScanResult';
 export * from './inviteScanResultStatus';
 export * from './inviteSummary';
+export * from './loginInput';
 export * from './rsvpStatus';
 export * from './updateInviteInput';
+export * from './updateUserInput';
+export * from './user';
+export * from './userRole';

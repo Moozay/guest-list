@@ -9,6 +9,70 @@ export interface HealthStatus {
   status: string;
 }
 
+export type UserRole = typeof UserRole[keyof typeof UserRole];
+
+
+export const UserRole = {
+  event_planner: 'event_planner',
+  guest_list_checker: 'guest_list_checker',
+} as const;
+
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AuthSession {
+  user: User;
+}
+
+export interface LoginInput {
+  /**
+     * @minLength 3
+     * @maxLength 64
+     */
+  username: string;
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  password: string;
+}
+
+export interface CreateUserInput {
+  /**
+     * @minLength 3
+     * @maxLength 64
+     * @pattern ^[A-Za-z0-9._-]+$
+     */
+  username: string;
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  displayName: string;
+  /**
+     * @minLength 12
+     * @maxLength 128
+     */
+  password: string;
+  role: UserRole;
+}
+
+export interface UpdateUserInput {
+  role?: UserRole;
+  isActive?: boolean;
+  /**
+     * @minLength 12
+     * @maxLength 128
+     */
+  password?: string;
+}
+
 export type RsvpStatus = typeof RsvpStatus[keyof typeof RsvpStatus];
 
 
@@ -28,6 +92,7 @@ export interface Invite {
   numberOfGuests: number;
   phoneNumber: string;
   email: string | null;
+  createdByName: string | null;
   inviteCode: string;
   rsvpStatus: RsvpStatus;
   createdAt: string;

@@ -11,6 +11,8 @@ out-tsc
 
 # dependencies
 node_modules
+.pnpm-store/
+.config/nextjs-nodejs/
 
 # IDEs and editors
 /.idea
